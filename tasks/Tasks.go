@@ -14,10 +14,6 @@ type Tasks struct {
 	content  JSONTasks
 }
 
-func deleteElement(slice []Task, index int) []Task {
-	return append(slice[:index], slice[index+1:]...)
-}
-
 // New constructor of tasks for building new instance of Tasks
 func New(filename string) Tasks {
 	// first we read the content of the file
@@ -43,29 +39,10 @@ func New(filename string) Tasks {
 	return tasks
 }
 
-func (tasks Tasks) FindLastId() int {
-	var maxId = 0
-	for _, task := range tasks.content.Tasks {
-		if task.Id > maxId {
-			maxId = task.Id
-		}
-	}
-	return maxId
-}
-
-func (tasks Tasks) FindIndex(id int) (int, error) {
-	for index, task := range tasks.content.Tasks {
-		if task.Id == id {
-			return index, nil
-		}
-	}
-	return -1, fmt.Errorf("task with id %d not found", id)
-}
-
 // AddTask add task to json
 func (tasks Tasks) AddTask(description string) {
 	newTask := Task{
-		Id:          tasks.FindLastId() + 1,
+		Id:          tasks.content.FindLastId() + 1,
 		Description: description,
 		Status:      "todo",
 		UpdatedAt:   time.Now().String(),
@@ -124,14 +101,15 @@ func (tasks Tasks) UpdateDescriptionTask(id int, description string) {
 
 // DeleteTask delete a task with a id
 func (tasks Tasks) DeleteTask(id int) {
-	foundTask, err := tasks.FindIndex(id)
+	foundTask, err := tasks.content.FindIndex(id)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	newTasks := deleteElement(tasks.content.Tasks, foundTask)
 
-	content, err := json.Marshal(JSONTasks{Tasks: newTasks})
+	newTasks := tasks.content.deleteElement(foundTask)
+
+	content, err := json.Marshal(newTasks)
 	if err != nil {
 		panic(err)
 	}

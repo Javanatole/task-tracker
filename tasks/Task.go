@@ -39,6 +39,29 @@ func (jsonTasks JSONTasks) String() string {
 	return buffer.String()
 }
 
+func (jsonTasks JSONTasks) deleteElement(index int) []Task {
+	return append(jsonTasks.Tasks[:index], jsonTasks.Tasks[index+1:]...)
+}
+
+func (jsonTasks JSONTasks) FindLastId() int {
+	var maxId = 0
+	for _, task := range jsonTasks.Tasks {
+		if task.Id > maxId {
+			maxId = task.Id
+		}
+	}
+	return maxId
+}
+
+func (jsonTasks JSONTasks) FindIndex(id int) (int, error) {
+	for index, task := range jsonTasks.Tasks {
+		if task.Id == id {
+			return index, nil
+		}
+	}
+	return -1, fmt.Errorf("task with id %d not found", id)
+}
+
 // ParseJSONTasks generate json tasks from string
 func ParseJSONTasks(content string) (JSONTasks, error) {
 	var tasks JSONTasks
