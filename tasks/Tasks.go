@@ -1,7 +1,6 @@
 package tasks
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -10,33 +9,16 @@ const DefaultContent = "{\"Tasks\":[]}"
 
 // Tasks representation structure of a filename and his content
 type Tasks struct {
-	filename string
-	content  JSONTasks
+	jsonHelper JsonHelper
+	content    JSONTasks
 }
 
 // New constructor of tasks for building new instance of Tasks
 func New(filename string) Tasks {
-	// first we read the content of the file
-	content, err := readContentFromFile(filename)
-	if err != nil {
-		// in case we discover an error, we re-write the content of the file
-		err = writeContentIntoFile(filename, DefaultContent)
-		if err != nil {
-			// in case we can't re-write the file we launch a panic error
-			panic(err)
-		}
-		// in case
-		content = DefaultContent
-	}
+	fileHelper := FileHelper{filename: filename}
+	jsonHelper := JsonHelper{fileHelper: fileHelper}
 
-	contentTasks, err := ParseJSONTasks(content)
-	if err != nil {
-		contentTasks = JSONTasks{[]Task{}}
-	}
-
-	tasks := Tasks{filename: filename, content: contentTasks}
-
-	return tasks
+	return Tasks{jsonHelper: jsonHelper, content: jsonHelper.readContentFromFile()}
 }
 
 // AddTask add task to json
@@ -48,16 +30,8 @@ func (tasks Tasks) AddTask(description string) {
 		UpdatedAt:   time.Now().String(),
 		CreatedAt:   time.Now().String(),
 	}
-
 	tasks.content.Tasks = append(tasks.content.Tasks, newTask)
-	content, err := json.Marshal(tasks.content)
-	if err != nil {
-		panic(err)
-	}
-	err = writeContentIntoFile(tasks.filename, string(content))
-	if err != nil {
-		panic(err)
-	}
+	tasks.jsonHelper.writeJSONTasks(tasks.content)
 }
 
 func (tasks Tasks) MarkAs(id int, status string) {
@@ -69,14 +43,7 @@ func (tasks Tasks) MarkAs(id int, status string) {
 		}
 		newTasks = append(newTasks, task)
 	}
-	content, err := json.Marshal(JSONTasks{Tasks: newTasks})
-	if err != nil {
-		panic(err)
-	}
-	err = writeContentIntoFile(tasks.filename, string(content))
-	if err != nil {
-		panic(err)
-	}
+	tasks.jsonHelper.writeJSONTasks(JSONTasks{Tasks: newTasks})
 }
 
 // UpdateDescriptionTask update description
@@ -89,14 +56,7 @@ func (tasks Tasks) UpdateDescriptionTask(id int, description string) {
 		}
 		newTasks = append(newTasks, task)
 	}
-	content, err := json.Marshal(JSONTasks{Tasks: newTasks})
-	if err != nil {
-		panic(err)
-	}
-	err = writeContentIntoFile(tasks.filename, string(content))
-	if err != nil {
-		panic(err)
-	}
+	tasks.jsonHelper.writeJSONTasks(JSONTasks{Tasks: newTasks})
 }
 
 // DeleteTask delete a task with a id
@@ -107,16 +67,8 @@ func (tasks Tasks) DeleteTask(id int) {
 		return
 	}
 
-	newTasks := tasks.content.deleteElement(foundTask)
-
-	content, err := json.Marshal(newTasks)
-	if err != nil {
-		panic(err)
-	}
-	err = writeContentIntoFile(tasks.filename, string(content))
-	if err != nil {
-		panic(err)
-	}
+	newTasks := tasks.content.DeleteElement(foundTask)
+	tasks.jsonHelper.writeJSONTasks(JSONTasks{Tasks: newTasks})
 }
 
 // ListTasks list tasks with the given status

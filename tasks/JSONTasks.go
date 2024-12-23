@@ -15,6 +15,7 @@ type Task struct {
 	UpdatedAt   string
 }
 
+// String show task representation
 func (task Task) String() string {
 	var buffer bytes.Buffer
 	buffer.WriteString(fmt.Sprintf("ID: %d\n", task.Id))
@@ -25,11 +26,12 @@ func (task Task) String() string {
 	return buffer.String()
 }
 
-// JSONTasks JSON representation of all tasks
+// JSONTasks representation of all tasks
 type JSONTasks struct {
 	Tasks []Task
 }
 
+// String representation of all tasks
 func (jsonTasks JSONTasks) String() string {
 	var buffer bytes.Buffer
 	for _, task := range jsonTasks.Tasks {
@@ -39,10 +41,12 @@ func (jsonTasks JSONTasks) String() string {
 	return buffer.String()
 }
 
-func (jsonTasks JSONTasks) deleteElement(index int) []Task {
+// DeleteElement delete element from list of tasks
+func (jsonTasks JSONTasks) DeleteElement(index int) []Task {
 	return append(jsonTasks.Tasks[:index], jsonTasks.Tasks[index+1:]...)
 }
 
+// FindLastId find last id of tasks
 func (jsonTasks JSONTasks) FindLastId() int {
 	var maxId = 0
 	for _, task := range jsonTasks.Tasks {
@@ -53,6 +57,7 @@ func (jsonTasks JSONTasks) FindLastId() int {
 	return maxId
 }
 
+// FindIndex find index of specific id
 func (jsonTasks JSONTasks) FindIndex(id int) (int, error) {
 	for index, task := range jsonTasks.Tasks {
 		if task.Id == id {
