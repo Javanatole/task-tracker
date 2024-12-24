@@ -1,20 +1,15 @@
 package tasks
 
 import (
-	"sync"
 	"time"
 )
 
 // TaskService manages task operations
 type TaskService struct {
-	sync.Mutex
 	Repo JSONStorage
 }
 
 func (taskService *TaskService) AddTask(description string) error {
-	taskService.Lock()
-	defer taskService.Unlock()
-
 	tasks, err := taskService.Repo.Load()
 	if err != nil {
 		return err
@@ -33,9 +28,6 @@ func (taskService *TaskService) AddTask(description string) error {
 }
 
 func (taskService *TaskService) UpdateTaskStatus(id int, status string) error {
-	taskService.Lock()
-	defer taskService.Unlock()
-
 	tasks, err := taskService.Repo.Load()
 	if err != nil {
 		return err
@@ -53,9 +45,6 @@ func (taskService *TaskService) UpdateTaskStatus(id int, status string) error {
 }
 
 func (taskService *TaskService) UpdateTaskDescription(id int, description string) error {
-	taskService.Lock()
-	defer taskService.Unlock()
-
 	tasks, err := taskService.Repo.Load()
 	if err != nil {
 		return err
@@ -73,9 +62,6 @@ func (taskService *TaskService) UpdateTaskDescription(id int, description string
 }
 
 func (taskService *TaskService) DeleteTask(id int) error {
-	taskService.Lock()
-	defer taskService.Unlock()
-
 	tasks, err := taskService.Repo.Load()
 	if err != nil {
 		return err
@@ -91,9 +77,6 @@ func (taskService *TaskService) DeleteTask(id int) error {
 }
 
 func (taskService *TaskService) ListTasks(status string) ([]Task, error) {
-	taskService.Lock()
-	defer taskService.Unlock()
-
 	tasks, err := taskService.Repo.Load()
 	if err != nil {
 		return nil, err
